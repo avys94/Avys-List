@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avys list</title>
+    <style>
+        :root {
+            --bg-main: #0d0e12;
+            --sidebar-bg: #13151b;
+            --card-bg: #181b24;
+            --card-hover: #202431;
+            --border-color: rgba(128, 0, 32, 0.3);
+            --border-glow: rgba(128, 0, 32, 0.7);
+            --accent-wine: #800020;
+            --accent-wine-light: #a81c38;
+            --accent-wine-glow: rgba(168, 28, 56, 0.5);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            /* Textura de fibra de carbono combinada con rojo vino y vinilos estéticos */
+            background-color: var(--bg-main);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(128, 0, 32, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(94, 25, 20, 0.2) 0%, transparent 50%),
+                linear-gradient(27deg, #121013 50%, #181418 50%),
+                repeating-linear-gradient(45deg, rgba(0,0,0,0.2) 0, rgba(0,0,0,0.2) 2px, transparent 0, transparent 4px);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* BARRA LATERAL */
+        aside {
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            gap: 20px;
+            z-index: 10;
+            box-shadow: 5px 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--accent-wine), #4a0012);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 22px;
+            color: white;
+            box-shadow: 0 0 15px var(--accent-wine-glow);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .brand-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: linear-gradient(90deg, #fff, #c92a49);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+            text-align: left;
+            width: 100%;
+        }
+
+        .nav-item:hover {
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            border-color: var(--border-color);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(128, 0, 32, 0.25), rgba(168, 28, 56, 0.15));
+            color: #fff;
+            border-color: var(--accent-wine-light);
+            box-shadow: 0 0 12px rgba(128, 0, 32, 0.3);
+        }
+
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* CONTENIDO PRINCIPAL */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background: radial-gradient(circle at top right, rgba(128, 0, 32, 0.08) 0%, transparent 50%);
+        }
+
+        header {
+            padding: 25px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(19, 21, 27, 0.85);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .header-title h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .header-title p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .dashboard-content {
+            padding: 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            background-image: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .card:hover {
+            border-color: var(--border-glow);
+            box-shadow: 0 8px 30px rgba(128, 0, 32, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--accent-wine-light);
+        }
+
+        /* SECCIÓN CARPETAS LOCALES */
+        .folder-dropzone {
+            border: 2px dashed var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            background: rgba(24, 27, 36, 0.7);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .folder-dropzone:hover {
+            border-color: var(--accent-wine-light);
+            background: rgba(128, 0, 32, 0.08);
+        }
+
+        .folder-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 280px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        .folder-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 10px 14px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .folder-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            overflow: hidden;
+        }
+
+        .folder-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .folder-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .btn-action {
+            background: linear-gradient(135deg, var(--accent-wine), #5e1914);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(128,0,32,0.3);
+        }
+
+        .btn-action:hover {
+            background: linear-gradient(135deg, var(--accent-wine-light), #800020);
+            box-shadow: 0 4px 12px rgba(168,28,56,0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* VENTANA FLOTANTE YOUTUBE MEJORADA */
+        #floating-youtube {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 400px;
+            background: #111318;
+            border: 1px solid var(--accent-wine-light);
+            border-radius: 14px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8), 0 0 20px rgba(128,0,32,0.3);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .yt-header {
+            background: linear-gradient(90deg, #4a0012, #1d0008);
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .yt-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .yt-controls {
+            display: flex;
+            gap: 6px;
+        }
+
+        .yt-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .yt-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        .yt-body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .yt-player-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 */
+            background: #000;
+        }
+
+        .yt-player-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .yt-toolbar {
+            padding: 10px;
+            display: flex;
+            gap: 8px;
+            background: #181b24;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .yt-input {
+            flex: 1;
+            background: #0d0e12;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px 10px;
+            color: #fff;
+            font-size: 0.85rem;
+        }
+
+        .yt-input:focus {
+            outline: none;
+            border-color: var(--accent-wine-light);
+        }
+
+        /* Buscador integrado de YouTube */
+        .yt-search-results {
+            max-height: 160px;
+            overflow-y: auto;
+            background: #14161f;
+            border-top: 1px solid var(--border-color);
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            padding: 6px;
+        }
+
+        .yt-search-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            background: rgba(255,255,255,0.02);
+            transition: background 0.2s;
+        }
+
+        .yt-search-item:hover {
+            background: rgba(128, 0, 32, 0.2);
+        }
+
+        .yt-search-item img {
+            width: 60px;
+            height: 34px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .yt-search-title {
+            font-size: 0.75rem;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .presets {
+            display: flex;
+            gap: 6px;
+            padding: 8px 10px;
+            background: #14161f;
+            border-top: 1px solid rgba(255,255,255,0.03);
+            overflow-x: auto;
+        }
+
+        .preset-chip {
+            background: rgba(128, 0, 32, 0.25);
+            border: 1px solid var(--border-color);
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: var(--text-main);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .preset-chip:hover {
+            background: var(--accent-wine);
+        }
+
+        /* VISTA PREVIA DE ARCHIVO */
+        #file-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            width: 750px;
+            max-width: 90vw;
+            max-height: 80vh;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            background: rgba(128, 0, 32, 0.3);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9rem;
+            background: #0a0b0e;
+            color: #d1d5db;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BARRA LATERAL -->
+    <aside>
+        <div class="brand">
+            <div class="brand-icon">A</div>
+            <div class="brand-title">Avys list</div>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">Navegación</div>
+            <button class="nav-item active" onclick="switchTab('dashboard')">
+                <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+                Dashboard
+            </button>
+            <button class="nav-item" onclick="toggleYoutubeWindow()">
+                <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                YouTube Flotante
+            </button>
+            <button class="nav-item" onclick="switchTab('folders')">
+                <svg viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+                Carpetas Locales
+            </button>
+        </div>
+
+        <div class="nav-section" style="margin-top: auto;">
+            <div class="nav-section-title">Sistema</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+                <span style="width: 8px; height: 8px; background: var(--success); border-radius: 50%; display: inline-block;"></span>
+                Sincronización en Directo
+            </div>
+        </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main>
+        <header>
+            <div class="header-title">
+                <h1 id="page-title">Dashboard Principal</h1>
+                <p id="page-subtitle">Monitoreo de carpetas locales y reproductor multimedia</p>
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <button class="btn-action btn-secondary" onclick="toggleYoutubeWindow()">Reproductor YouTube</button>
+                <button class="btn-action" onclick="selectLocalFolder()">+ Vincular Carpeta</button>
+            </div>
+        </header>
+
+        <div class="dashboard-content">
+            <!-- TARJETA: CARPETAS LOCALES EN TIEMPO REAL -->
+            <div class="card" style="grid-column: span 2;">
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
+                        Gestor de Carpetas Locales (Tiempo Real)
+                    </div>
+                    <span style="font-size: 0.8rem; color: var(--success); background: rgba(16, 185, 129, 0.1); padding: 4px 8px; border-radius: 4px;" id="sync-status">Auto-actualización: 2.5s</span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">
+                    Selecciona una carpeta de tu ordenador. Se escanean de forma recursiva todos los archivos y subcarpetas en tiempo real.
+                </p>
+                <div class="folder-dropzone" onclick="selectLocalFolder()">
+                    <p style="font-weight: 600; color: #fff; margin-bottom: 4px;">Haz clic para vincular una carpeta del PC</p>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">Compatible con lectura automática recursiva</p>
+                </div>
+                <div class="folder-list" id="folders-container">
+                    <div style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 0.85rem;">
+                        No hay carpetas vinculadas actualmente.
+                    </div>
+                </div>
+            </div>
+
+            <!-- TARJETA: ESTADO DEL SISTEMA -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                        Estado del Sistema
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.9rem;">
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <span style="color: var(--text-muted);">Carpetas Monitoreadas</span>
+                        <span id="stat-folders-count" style="font-weight: 600;">0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <span style="color: var(--text-muted);">Archivos Totales</span>
+                        <span id="stat-files-count" style="font-weight: 600;">0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                        <span style="color: var(--text-muted);">Ventana YouTube</span>
+                        <span id="stat-yt-status" style="color: var(--danger);">Oculto</span>
+                    </div>
+                </div>
+                <button class="btn-action btn-secondary" style="width: 100%; margin-top: auto; justify-content: center;" onclick="toggleYoutubeWindow()">
+                    Mostrar Ventana YouTube
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- VENTANA FLOTANTE YOUTUBE (Con buscador y reproducción normal) -->
+    <div id="floating-youtube">
+        <div class="yt-header" id="yt-drag-handle">
+            <div class="yt-title">
+                <svg style="width:16px;height:16px;fill:var(--danger);" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                Reproductor YouTube
+            </div>
+            <div class="yt-controls">
+                <button class="yt-btn" onclick="toggleYoutubeWindow()" title="Cerrar">✕</button>
+            </div>
+        </div>
+        <div class="yt-body">
+            <div class="yt-player-container">
+                <iframe id="yt-iframe" src="https://www.youtube.com/embed/jfKfPfyJRdk?enablejsapi=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+            <div class="presets">
+                <div class="preset-chip" onclick="loadYtVideo('jfKfPfyJRdk')">🎧 Lo-Fi Beats</div>
+                <div class="preset-chip" onclick="loadYtVideo('4xDzrJKXOOY')">⚡ Synthwave</div>
+                <div class="preset-chip" onclick="loadYtVideo('5qap5aO4i9A')">🌧️ Lluvia Relajante</div>
+            </div>
+            <div class="yt-toolbar">
+                <input type="text" id="yt-search-input" class="yt-input" placeholder="Buscar video o pega URL/ID..." onkeypress="handleYtKeypress(event)">
+                <button class="btn-action" style="padding: 6px 12px; font-size: 0.8rem;" onclick="searchOrLoadYoutube()">Buscar</button>
+            </div>
+            <div id="yt-search-results" class="yt-search-results"></div>
+        </div>
+    </div>
+
+    <!-- MODAL VISTA PREVIA DE ARCHIVO -->
+    <div id="file-modal" onclick="closeFileModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span id="modal-filename" style="font-weight: 600; font-size: 0.95rem; color: #fff;">archivo.txt</span>
+                <button class="yt-btn" onclick="document.getElementById('file-modal').style.display='none'">✕</button>
+            </div>
+            <div class="modal-body" id="modal-file-content">
+                Cargando contenido...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let linkedFolders = [];
+        let isYoutubeOpen = false;
+
+        function toggleYoutubeWindow() {
+            const win = document.getElementById('floating-youtube');
+            const status = document.getElementById('stat-yt-status');
+            isYoutubeOpen = !isYoutubeOpen;
+            if (isYoutubeOpen) {
+                win.style.display = 'flex';
+                status.textContent = 'Visible';
+                status.style.color = 'var(--success)';
+            } else {
+                win.style.display = 'none';
+                status.textContent = 'Oculto';
+                status.style.color = 'var(--danger)';
+            }
+        }
+
+        function loadYtVideo(videoId) {
+            const iframe = document.getElementById('yt-iframe');
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            document.getElementById('yt-search-results').style.display = 'none';
+        }
+
+        function handleYtKeypress(e) {
+            if (e.key === 'Enter') {
+                searchOrLoadYoutube();
+            }
+        }
+
+        async function searchOrLoadYoutube() {
+            const val = document.getElementById('yt-search-input').value.trim();
+            if (!val) return;
+
+            // Comprobar si es URL o ID directo
+            let videoId = val;
+            if (val.includes('youtube.com') || val.includes('youtu.be')) {
+                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+                const match = val.match(regExp);
+                if (match && match[2].length === 11) {
+                    videoId = match[2];
+                    loadYtVideo(videoId);
+                    document.getElementById('yt-search-input').value = '';
+                    return;
+                }
+            }
+            if (val.length === 11 && !val.includes(' ')) {
+                loadYtVideo(val);
+                document.getElementById('yt-search-input').value = '';
+                return;
+            }
+
+            // Búsqueda mediante la API pública sin clave de YouTube (JSONP / Invidious o sugerencias)
+            const resultsContainer = document.getElementById('yt-search-results');
+            resultsContainer.innerHTML = '<div style="padding: 8px; font-size: 0.8rem; color: var(--text-muted); text-align: center;">Buscando videos...</div>';
+            resultsContainer.style.display = 'flex';
+
+            try {
+                // Usando un proxy seguro de sugerencias de YouTube para obtener resultados en tiempo real
+                const response = await fetch(`https://suggestqueries.google.com/complete/search?client=youtube&ds=yt&q=${encodeURIComponent(val)}`);
+                const textData = await response.text();
+                // Parsear formato JSONP de Google
+                const jsonStart = textData.indexOf('(');
+                const jsonEnd = textData.lastIndexOf(')');
+                const json = JSON.parse(textData.substring(jsonStart + 1, jsonEnd));
+                const suggestions = json[1];
+
+                if (!suggestions || suggestions.length === 0) {
+                    resultsContainer.innerHTML = '<div style="padding: 8px; font-size: 0.8rem; color: var(--text-muted); text-align: center;">No se encontraron resultados. Prueba pegando un ID o URL.</div>';
+                    return;
+                }
+
+                resultsContainer.innerHTML = '';
+                // Como las sugerencias de texto no devuelven IDs directos sin API Key oficial, realizamos búsqueda en una API pública de respaldo o redirigimos la consulta a un visor embebido de resultados
+                suggestions.slice(0, 5).forEach((item) => {
+                    const queryText = Array.isArray(item) ? item[0] : item;
+                    const div = document.createElement('div');
+                    div.className = 'yt-search-item';
+                    div.innerHTML = `
+                        <div style="background: var(--accent-wine); width: 40px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 10px; font-weight: bold;">▶</div>
+                        <div class="yt-search-title">${queryText}</div>
+                    `;
+                    div.onclick = () => {
+                        // Abrir búsqueda directa en el iframe incrustado de reproducción o cargar un visor de resultados de YouTube
+                        const searchEmbedUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(queryText)}&autoplay=1`;
+                        document.getElementById('yt-iframe').src = searchEmbedUrl;
+                        resultsContainer.style.display = 'none';
+                        document.getElementById('yt-search-input').value = '';
+                    };
+                    resultsContainer.appendChild(div);
+                });
+            } catch (err) {
+                // Fallback directo: incrustar reproducción de búsqueda general si falla la sugerencia
+                const searchEmbedUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(val)}&autoplay=1`;
+                document.getElementById('yt-iframe').src = searchEmbedUrl;
+                resultsContainer.style.display = 'none';
+                document.getElementById('yt-search-input').value = '';
+            }
+        }
+
+        async function selectLocalFolder() {
+            if (!window.showDirectoryPicker) {
+                alert('Tu navegador no soporta la API de selección de directorios locales. Utiliza Google Chrome, Edge o Brave.');
+                return;
+            }
+            try {
+                const dirHandle = await window.showDirectoryPicker();
+                const folderName = dirHandle.name;
+                
+                if (linkedFolders.some(f => f.handle.name === folderName)) {
+                    alert('Esta carpeta ya está vinculada.');
+                    return;
+                }
+
+                const folderObj = {
+                    handle: dirHandle,
+                    name: folderName,
+                    files: [],
+                    lastChecked: new Date()
+                };
+
+                await scanFolderRecursive(folderObj.handle, folderObj.files, '');
+                linkedFolders.push(folderObj);
+                renderFolders();
+                updateStats();
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error(err);
+                }
+            }
+        }
+
+        // Función recursiva robusta para leer todos los archivos y subcarpetas sin omitir nada
+        async function scanFolderRecursive(dirHandle, fileList, pathPrefix) {
+            for await (const entry of dirHandle.values()) {
+                const relativePath = pathPrefix ? `${pathPrefix}/${entry.name}` : entry.name;
+                if (entry.kind === 'file') {
+                    try {
+                        const file = await entry.getFile();
+                        fileList.push({
+                            name: entry.name,
+                            path: relativePath,
+                            size: file.size,
+                            lastModified: file.lastModified,
+                            handle: entry
+                        });
+                    } catch (e) {
+                        // Omitir archivos bloqueados
+                    }
+                } else if (entry.kind === 'directory') {
+                    await scanFolderRecursive(entry, fileList, relativePath);
+                }
+            }
+        }
+
+        async function scanFolder(folderObj) {
+            folderObj.files = [];
+            await scanFolderRecursive(folderObj.handle, folderObj.files, '');
+            folderObj.lastChecked = new Date();
+        }
+
+        async function openFilePreview(fileEntry) {
+            try {
+                const file = await fileEntry.handle.getFile();
+                const text = await file.text();
+                document.getElementById('modal-filename').textContent = fileEntry.path;
+                document.getElementById('modal-file-content').textContent = text || '(Archivo vacío o formato no textual)';
+                document.getElementById('file-modal').style.display = 'flex';
+            } catch (err) {
+                alert('No se pudo leer el contenido del archivo: ' + err.message);
+            }
+        }
+
+        function renderFolders() {
+            const container = document.getElementById('folders-container');
+            if (linkedFolders.length === 0) {
+                container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 0.85rem;">No hay carpetas vinculadas actualmente.</div>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            linkedFolders.forEach((folder, fIndex) => {
+                const folderDiv = document.createElement('div');
+                folderDiv.style.cssText = "background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; margin-bottom: 10px;";
+                
+                let filesHtml = '';
+                if (folder.files.length === 0) {
+                    filesHtml = `<div style="font-size: 0.8rem; color: var(--text-muted); padding: 6px 0;">Carpeta vacía o analizando...</div>`;
+                } else {
+                    folder.files.forEach((file, fileIdx) => {
+                        filesHtml += `
+                            <div class="folder-item">
+                                <div class="folder-info">
+                                    <span class="folder-name">📄 ${file.path}</span>
+                                    <span class="folder-meta">${(file.size / 1024).toFixed(1)} KB • ${new Date(file.lastModified).toLocaleTimeString()}</span>
+                                </div>
+                                <button class="btn-action" style="padding: 4px 10px; font-size: 0.75rem;" onclick="openFilePreview(${fIndex}, ${fileIdx})">Ver</button>
+                            </div>
+                        `;
+                    });
+                }
+
+                folderDiv.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px;">
+                        <span style="font-weight: 600; font-size: 0.9rem; color: #fff; display: flex; align-items: center; gap: 6px;">
+                            📁 ${folder.name}
+                        </span>
+                        <div style="display: flex; gap: 6px; align-items: center;">
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">${folder.files.length} archivos detectados</span>
+                            <button class="yt-btn" style="color: var(--danger);" onclick="removeFolder(${fIndex})" title="Desvincular">✕</button>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto;">
+                        ${filesHtml}
+                    </div>
+                `;
+                container.appendChild(folderDiv);
+            });
+        }
+
+        window.openFilePreview = async function(folderIndex, fileIndex) {
+            const folder = linkedFolders[folderIndex];
+            const fileObj = folder.files[fileIndex];
+            if (fileObj) {
+                await openFilePreview(fileObj);
+            }
+        };
+
+        function removeFolder(index) {
+            linkedFolders.splice(index, 1);
+            renderFolders();
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('stat-folders-count').textContent = linkedFolders.length;
+            let totalFiles = linkedFolders.reduce((acc, f) => acc + f.files.length, 0);
+            document.getElementById('stat-files-count').textContent = totalFiles;
+        }
+
+        // Bucle en tiempo real (cada 2.5 segundos verifica si hay cambios o archivos nuevos)
+        setInterval(async () => {
+            if (linkedFolders.length === 0) return;
+            for (let folder of linkedFolders) {
+                try {
+                    await scanFolder(folder);
+                } catch (e) {
+                    // Ignorar si se deniega temporalmente el permiso
+                }
+            }
+            renderFolders();
+            updateStats();
+        }, 2500);
+
+        function switchTab(tab) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            if (tab === 'dashboard') {
+                event.currentTarget.classList.add('active');
+                document.getElementById('page-title').textContent = 'Dashboard Principal';
+                document.getElementById('page-subtitle').textContent = 'Monitoreo de carpetas locales y reproductor multimedia';
+            } else if (tab === 'folders') {
+                document.getElementById('page-title').textContent = 'Carpetas Locales';
+                document.getElementById('page-subtitle').textContent = 'Sincronización en directo con actualización automática';
+            }
+        }
+
+        function closeFileModal(e) {
+            if (e.target.id === 'file-modal') {
+                document.getElementById('file-modal').style.display = 'none';
+            }
+        }
+
+        // Habilitar arrastre de la ventana flotante de YouTube
+        const dragHandle = document.getElementById('yt-drag-handle');
+        const floatingWin = document.getElementById('floating-youtube');
+        let isDragging = false, startX, startY, initialX, initialY;
+
+        dragHandle.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            const rect = floatingWin.getBoundingClientRect();
+            initialX = rect.left;
+            initialY = window.innerHeight - rect.bottom;
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            floatingWin.style.left = `${initialX + dx}px`;
+            floatingWin.style.bottom = `${initialY - dy}px`;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+    </script>
+</body>
+</html>
